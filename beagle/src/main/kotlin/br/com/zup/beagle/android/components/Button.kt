@@ -16,17 +16,22 @@
 
 package br.com.zup.beagle.android.components
 
+import android.util.TypedValue
 import android.view.View
+import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
 import br.com.zup.beagle.analytics.ClickEvent
 import br.com.zup.beagle.android.action.Action
 import br.com.zup.beagle.android.context.Bind
 import br.com.zup.beagle.android.context.expressionOrValueOf
+import br.com.zup.beagle.android.context.expressionOrValueOfNullable
 import br.com.zup.beagle.android.context.valueOfNullable
 import br.com.zup.beagle.android.data.PreFetchHelper
 import br.com.zup.beagle.android.setup.BeagleEnvironment
 import br.com.zup.beagle.android.utils.StyleManager
 import br.com.zup.beagle.android.utils.handleEvent
 import br.com.zup.beagle.android.utils.observeBindChanges
+import br.com.zup.beagle.android.utils.toAndroidColor
 import br.com.zup.beagle.android.view.ViewFactory
 import br.com.zup.beagle.android.widget.RootView
 import br.com.zup.beagle.android.widget.WidgetView
@@ -44,22 +49,30 @@ import br.com.zup.beagle.annotation.RegisterWidget
 @RegisterWidget("button")
 data class Button(
     val text: Bind<String>,
+    val textColor: Bind<String>? = null,
+    val textSize: Bind<Int>? = null,
     val styleId: String? = null,
     val onPress: List<Action>? = null,
-    @Deprecated("It was deprecated in version 1.10.0 and will be removed in a future version." +
-        " Use the new analytics.")
+    @Deprecated(
+        "It was deprecated in version 1.10.0 and will be removed in a future version." +
+                " Use the new analytics."
+    )
     val clickAnalyticsEvent: ClickEvent? = null,
     val enabled: Bind<Boolean>? = null,
 ) : WidgetView() {
 
     constructor(
         text: String,
+        textColor: String? = null,
+        textSize: Int? = null,
         styleId: String? = null,
         onPress: List<Action>? = null,
         clickAnalyticsEvent: ClickEvent? = null,
         enabled: Boolean? = null,
     ) : this(
         expressionOrValueOf(text),
+        expressionOrValueOfNullable(textColor),
+        valueOfNullable(textSize),
         styleId,
         onPress,
         clickAnalyticsEvent,
@@ -102,6 +115,27 @@ data class Button(
         observeBindChanges(rootView, button, text) {
             button.text = it
         }
+
+        textColor?.also {
+            observeBindChanges(rootView, button, it) { value ->
+                if (value != null) {
+                    button.setTextColor(value)
+                }
+            }
+        }
+
+        textSize?.also {
+            observeBindChanges(rootView, button, it) { value ->
+                if (value != null) {
+                    button.setTextSize(TypedValue.COMPLEX_UNIT_PX, value.toFloat())
+                }
+            }
+        }
+
         return button
+    }
+
+    private fun AppCompatButton.setTextColor(color: String?) {
+        color?.toAndroidColor()?.let { androidColor -> setTextColor(androidColor) }
     }
 }

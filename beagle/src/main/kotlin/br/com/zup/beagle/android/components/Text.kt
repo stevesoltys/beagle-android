@@ -48,6 +48,7 @@ data class Text(
     val text: Bind<String>,
     val styleId: String? = null,
     val textColor: Bind<String>? = null,
+    val textSize: Bind<Int>? = null,
     val alignment: Bind<TextAlignment>? = null,
 ) : WidgetView() {
 
@@ -55,11 +56,13 @@ data class Text(
         text: String,
         styleId: String? = null,
         textColor: String? = null,
+        textSize: Int? = null,
         alignment: TextAlignment? = null,
     ) : this(
         expressionOrValueOf(text),
         styleId,
         expressionOrValueOfNullable(textColor),
+        valueOfNullable(textSize),
         valueOfNullable(alignment)
     )
 
@@ -85,6 +88,12 @@ data class Text(
         text.textColor?.let {
             observeBindChanges(rootView, this, it) { value ->
                 value?.let { color -> this.setTextColor(color) }
+            }
+        }
+
+        text.textSize?.let {
+            observeBindChanges(rootView, this, it) { value ->
+                value?.let { size -> this.textSize = size.toFloat() }
             }
         }
 
