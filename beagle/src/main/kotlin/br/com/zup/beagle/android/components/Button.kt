@@ -127,7 +127,7 @@ data class Button(
         textSize?.also {
             observeBindChanges(rootView, button, it) { value ->
                 if (value != null) {
-                    button.setTextSize(TypedValue.COMPLEX_UNIT_PX, value.toFloat())
+                    button.setTextSize(TypedValue.COMPLEX_UNIT_SP, value.toFloat())
                 }
             }
         }
