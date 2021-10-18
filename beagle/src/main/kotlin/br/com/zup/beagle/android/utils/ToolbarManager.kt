@@ -23,6 +23,7 @@ import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -234,19 +235,8 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
             items[i].image?.let { image ->
                 setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
 
-                screenComponent.observeBindChanges(rootView, container, image.mobileId) { mobileId ->
-                    mobileId?.let {
-                        icon = designSystem.image(it)?.let { iconRes ->
-                            ResourcesCompat.getDrawable(
-                                rootView.getContext().resources,
-                                iconRes,
-                                null
-                            )
-                        }
-                    }
-                }
-
-
+                val imageView = image.buildView(rootView) as ImageView
+                icon = imageView.drawable
             }
         }
     }
