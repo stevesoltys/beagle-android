@@ -24,6 +24,14 @@ import br.com.zup.beagle.annotation.RegisterOperation
 internal class EqOperation : Operation {
 
     override fun execute(vararg params: OperationType?): OperationType {
+
+        if(params.all { it is OperationType.TypeNumber }) {
+            val value1 = (params[0] as OperationType.TypeNumber).value.toDouble()
+            val value2 = (params[1] as OperationType.TypeNumber).value.toDouble()
+
+            return OperationType.TypeBoolean(value1 == value2)
+        }
+
         val result = params[0].toString() == params[1].toString()
 
         return OperationType.TypeBoolean(result)
