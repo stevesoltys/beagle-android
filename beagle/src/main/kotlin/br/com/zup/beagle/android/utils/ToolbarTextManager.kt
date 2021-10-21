@@ -19,6 +19,7 @@ package br.com.zup.beagle.android.utils
 import android.content.Context
 import android.text.TextUtils
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
@@ -57,7 +58,7 @@ object ToolbarTextManager {
 
     fun centerTitle(
         toolbar: Toolbar,
-        titleTextView: TextView
+        titleTextView: View
     ) {
         toolbar.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             val idealX = ((toolbar.width - titleTextView.width) / 2).toFloat()

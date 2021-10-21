@@ -21,7 +21,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'de.mannodermaus.android-junit5'
 apply plugin: 'kotlin-parcelize'
-apply plugin: "org.jetbrains.dokka"
 
 android {
     compileSdkVersion Dependencies.Versions.compileSdk

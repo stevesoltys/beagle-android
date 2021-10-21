@@ -24,10 +24,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
@@ -60,12 +61,17 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
                     navigationContentDescription = backButtonAccessibilityLabel
                 }
                 navigationBar.backButtonAccessibility?.isHeader?.let { isHeader ->
-                    ViewCompat.setAccessibilityDelegate(this, object : AccessibilityDelegateCompat() {
-                        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
-                            super.onInitializeAccessibilityNodeInfo(host, info)
-                            info.isHeading = isHeader
-                        }
-                    })
+                    ViewCompat.setAccessibilityDelegate(
+                        this,
+                        object : AccessibilityDelegateCompat() {
+                            override fun onInitializeAccessibilityNodeInfo(
+                                host: View,
+                                info: AccessibilityNodeInfoCompat
+                            ) {
+                                super.onInitializeAccessibilityNodeInfo(host, info)
+                                info.isHeading = isHeader
+                            }
+                        })
                 }
 
                 setNavigationOnClickListener {
@@ -87,7 +93,7 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
         (rootView.getContext() as BeagleActivity).getToolbar().apply {
             visibility = View.VISIBLE
             menu.clear()
-            setAttributeToolbar(rootView.getContext(), this, navigationBar)
+            setAttributeToolbar(rootView, rootView.getContext(), this, navigationBar)
             navigationBar.navigationBarItems?.let { items ->
                 configToolbarItems(rootView, this, items, container, screenComponent)
             }
@@ -95,6 +101,7 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
     }
 
     private fun setAttributeToolbar(
+        rootView: RootView,
         context: Context,
         toolbar: Toolbar,
         navigationBar: NavigationBar
@@ -102,13 +109,36 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
         val designSystem = BeagleEnvironment.beagleSdk.designSystem
         val toolbarStyle = navigationBar.styleId?.let { designSystem?.toolbarStyle(it) }
         if (toolbarStyle == null) {
-            setTitle(context, toolbar, navigationBar)
+            setTitle(rootView, context, toolbar, navigationBar)
         } else {
-            configToolbarStyle(context, toolbar, navigationBar, toolbarStyle)
+            configToolbarStyle(rootView, context, toolbar, navigationBar, toolbarStyle)
+        }
+
+        val style = navigationBar.navigationBarStyle
+
+        style?.apply {
+            backgroundColor?.toAndroidColor()?.also { toolbar.setBackgroundColor(it) }
+
+            tintColor?.toAndroidColor()?.also { androidColor ->
+                toolbar.setTitleTextColor(androidColor)
+                toolbar.overflowIcon?.also { DrawableCompat.setTint(it, androidColor) }
+            }
+
+            textColor?.toAndroidColor()?.also {
+                toolbar.setTitleTextColor(it)
+            }
+
+            if (isShadowEnabled == false) {
+                ViewCompat.setElevation(toolbar, 0f)
+            } else {
+                // 4 points https://material.io/design/environment/elevation.html#elevation-shadows-elevation-android
+                ViewCompat.setElevation(toolbar, 4f.dp())
+            }
         }
     }
 
     private fun configToolbarStyle(
+        rootView: RootView,
         context: Context,
         toolbar: Toolbar,
         navigationBar: NavigationBar,
@@ -129,7 +159,7 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
             R.styleable.BeagleToolbarStyle_titleTextAppearance, 0
         )
         val isCenterTitle = typedArray.getBoolean(R.styleable.BeagleToolbarStyle_centerTitle, false)
-        setTitle(context, toolbar, navigationBar, textAppearance, isCenterTitle)
+        setTitle(rootView, context, toolbar, navigationBar, textAppearance, isCenterTitle)
         val backgroundColor = typedArray.getColor(
             R.styleable.BeagleToolbarStyle_backgroundColor, 0
         )
@@ -140,6 +170,7 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
     }
 
     private fun setTitle(
+        rootView: RootView,
         context: Context,
         toolbar: Toolbar,
         navigationBar: NavigationBar,
@@ -147,7 +178,29 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
         isCenterTitle: Boolean = false
     ) {
         removePreviousToolbarTitle(toolbar)
-        if (isCenterTitle) {
+
+        val titleImage = navigationBar.navigationBarStyle?.titleImage
+
+        if (titleImage != null) {
+            val imageView = titleImage.buildView(rootView) as ImageView
+            imageView.id = R.id.beagle_toolbar_image
+
+            titleImage.style?.size?.let {
+                val width = it.width?.value?.toInt()?.dp()
+                val height = it.height?.value?.toInt()?.dp()
+
+                if (width != null && height != null) {
+                    imageView.layoutParams = LinearLayout.LayoutParams(width, height)
+                }
+            }
+
+            toolbar.title = ""
+            toolbar.addView(imageView)
+            toolbarTextManager.centerTitle(toolbar, imageView)
+            toolbar.contentInsetStartWithNavigation = CONTENT_INSET_ZERO
+            toolbar.setContentInsetsAbsolute(CONTENT_INSET_LEFT_ZERO, CONTENT_INSET_RIGHT_ZERO)
+
+        } else if (isCenterTitle) {
             setCenterTitle(context, toolbar, navigationBar, textAppearance)
         } else {
             setDefaultTitle(context, toolbar, navigationBar, textAppearance)
@@ -180,8 +233,10 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
     }
 
     private fun removePreviousToolbarTitle(toolbar: Toolbar) {
-        val centeredTitle = toolbar.findViewById<TextView>(R.id.beagle_toolbar_text)
+        val centeredTitle = toolbar.findViewById<View>(R.id.beagle_toolbar_text)
         toolbar.removeView(centeredTitle)
+
+        toolbar.removeView(toolbar.findViewById(R.id.beagle_toolbar_image))
     }
 
     private fun configToolbarItems(
@@ -193,21 +248,22 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
     ) {
         val designSystem = BeagleEnvironment.beagleSdk.designSystem
         for (i in items.indices) {
-            toolbar.menu.add(Menu.NONE, items[i].id?.toAndroidId() ?: i, Menu.NONE, items[i].text).apply {
-                setOnMenuItemClickListener {
-                    val action = items[i].action
-                    action.handleEvent(rootView, toolbar, action)
-                    return@setOnMenuItemClickListener true
-                }
+            toolbar.menu.add(Menu.NONE, items[i].id?.toAndroidId() ?: i, Menu.NONE, items[i].text)
+                .apply {
+                    setOnMenuItemClickListener {
+                        val action = items[i].action
+                        action.handleEvent(rootView, toolbar, action)
+                        return@setOnMenuItemClickListener true
+                    }
 
-                setContentDescription(items, i)
+                    setContentDescription(items, i)
 
-                if (items[i].image == null) {
-                    setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-                } else {
-                    configMenuItem(designSystem, items, i, rootView, container, screenComponent)
+                    if (items[i].image == null) {
+                        setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+                    } else {
+                        configMenuItem(designSystem, items, i, rootView, container, screenComponent)
+                    }
                 }
-            }
         }
     }
 
@@ -248,7 +304,8 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
 
     private fun setupNavigationIcon(context: Context, toolbar: Toolbar) {
         if (toolbar.navigationIcon == null) {
-            toolbar.navigationIcon = getDrawableFromAttribute(context, androidx.appcompat.R.attr.homeAsUpIndicator)
+            toolbar.navigationIcon =
+                getDrawableFromAttribute(context, androidx.appcompat.R.attr.homeAsUpIndicator)
         }
     }
 }

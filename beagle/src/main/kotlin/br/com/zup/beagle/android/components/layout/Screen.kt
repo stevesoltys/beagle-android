@@ -91,6 +91,21 @@ data class NavigationBar(
     val styleId: String? = null,
     val navigationBarItems: List<NavigationBarItem>? = null,
     val backButtonAccessibility: Accessibility? = null,
+    val navigationBarStyle: NavigationBarStyle? = null,
+)
+
+/**
+ * The navigation bar style.
+ */
+@BeagleJson(name = "navigationBarStyle")
+data class NavigationBarStyle(
+    val backgroundColor: String? = null,
+    val textColor: String? = null,
+    val textSize: Int? = null,
+    val tintColor: String? = null,
+    val isShadowEnabled: Boolean? = null,
+    val isTransparent: Boolean? = null,
+    val titleImage: Image? = null
 )
 
 /**
@@ -127,8 +142,10 @@ data class Screen private constructor(
     val navigationBar: NavigationBar? = null,
     override val child: ServerDrivenComponent,
     val style: Style? = null,
-    @Deprecated("It was deprecated in version 1.10.0 and will be removed in a future version." +
-        " Use the new analytics.")
+    @Deprecated(
+        "It was deprecated in version 1.10.0 and will be removed in a future version." +
+                " Use the new analytics."
+    )
     override val screenAnalyticsEvent: ScreenEvent? = null,
     override val context: ContextData? = null,
     override val id: String? = null,
