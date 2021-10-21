@@ -43,6 +43,7 @@ internal object ActionJsonAdapterFactory {
             .withSubtype(Navigate.PushStack::class.java, createNamespaceFor<Navigate.PushStack>("pushStack"))
             .withSubtype(Navigate.PopStack::class.java, createNamespaceFor<Navigate.PopStack>("popStack"))
             .withSubtype(Navigate.PushView::class.java, createNamespaceFor<Navigate.PushView>("pushView"))
+            .withSubtype(Navigate.PushViewRoot::class.java, createNamespaceFor<Navigate.PushView>("pushViewRoot"))
             .withSubtype(Navigate.PopView::class.java, createNamespaceFor<Navigate.PopView>("popView"))
             .withSubtype(Navigate.PopToView::class.java, createNamespaceFor<Navigate.PopToView>("popToView"))
             .withSubtype(Navigate.ResetApplication::class.java,

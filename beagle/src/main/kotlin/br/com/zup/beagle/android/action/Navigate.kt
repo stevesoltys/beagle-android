@@ -156,6 +156,13 @@ sealed class Navigate : AnalyticsAction {
         }
     }
 
+    @BeagleJson(name = "pushViewRoot")
+    data class PushViewRoot(val route: Route, override var analytics: ActionAnalyticsConfig? = null) : Navigate() {
+        override fun execute(rootView: RootView, origin: View) {
+            BeagleNavigator.pushView(rootView.getContext(), route.getSafe(rootView, origin))
+        }
+    }
+
     /**
      * Present a new screen with the link declared in the route attribute.
      * This attribute basically has the same functionality as PushView but starting a new flow instead.

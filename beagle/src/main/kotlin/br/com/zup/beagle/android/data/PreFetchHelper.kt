@@ -37,6 +37,7 @@ internal class PreFetchHelper {
         when (action) {
             is Navigate.PushStack -> preFetch(rootView, action.route)
             is Navigate.PushView -> preFetch(rootView, action.route)
+            is Navigate.PushViewRoot -> preFetch(rootView, action.route)
             is Navigate.ResetApplication -> preFetch(rootView, action.route)
             is Navigate.ResetStack -> preFetch(rootView, action.route)
         }
