@@ -20,4 +20,5 @@
 
     <string name="beagle_label_generic_error">Oops! Something went wrong!.</string>
     <string name="beagle_label_try_again">Try again</string>
+    <string name="google_sign_in_client_id">REPLACE ME</string>
 </resources>

@@ -16,11 +16,16 @@
 
 package br.com.zup.beagle.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import br.com.zup.beagle.android.components.utils.applyBackgroundFromWindowBackgroundTheme
@@ -32,6 +37,11 @@ import br.com.zup.beagle.android.widget.UndefinedWidget
 import br.com.zup.beagle.core.ServerDrivenComponent
 
 internal class BeagleFragment : Fragment() {
+
+    val activityResultListeners: MutableList<ActivityResultCallback<ActivityResult>> =
+        mutableListOf()
+
+    lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
 
     private val screen: ServerDrivenComponent by lazy {
         val json = arguments?.getString(JSON_SCREEN_KEY) ?: beagleSerializer.serializeComponent(UndefinedWidget())
@@ -79,6 +89,13 @@ internal class BeagleFragment : Fragment() {
         screenIdentifier?.let { screenIdentifier ->
             analyticsViewModel.createScreenReport(screenIdentifier)
         }
+
+        activityResultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                activityResultListeners.forEach { listener ->
+                    listener.onActivityResult(it)
+                }
+            }
     }
 
     override fun onCreateView(

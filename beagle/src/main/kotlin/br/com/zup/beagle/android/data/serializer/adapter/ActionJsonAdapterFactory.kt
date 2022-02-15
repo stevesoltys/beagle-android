@@ -55,6 +55,11 @@ internal object ActionJsonAdapterFactory {
             .withSubtype(AddChildren::class.java, createNamespaceFor<AddChildren>("addChildren"))
             .withSubtype(Condition::class.java, createNamespaceFor<Condition>("condition"))
             .withSubtype(Wait::class.java, createNamespaceFor<Wait>("wait"))
+            .withSubtype(While::class.java, createNamespaceFor<While>("while"))
+            .withSubtype(FirebaseSignIn::class.java, createNamespaceFor<FirebaseSignIn>("firebaseSignIn"))
+            .withSubtype(FirebaseSignOut::class.java, createNamespaceFor<FirebaseSignOut>("firebaseSignOut"))
+            .withSubtype(FirebaseFetchUserDetails::class.java, createNamespaceFor<FirebaseFetchUserDetails>("firebaseFetchUserDetails"))
+            .withSubtype(FirebaseSendVerificationEmail::class.java, createNamespaceFor<FirebaseSendVerificationEmail>("firebaseSendVerificationEmail"))
     }
 
     private inline fun <reified T : Action> createNamespaceFor(name: String): String {

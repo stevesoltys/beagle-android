@@ -48,14 +48,17 @@ class Dependencies : Plugin<Project> {
         const val minSdk = 19
         const val targetSdk = 30
         const val buildTools = "30.0.2"
-        const val kotlin = "1.5.10"
+        const val kotlin = "1.6.10"
 
-        const val kotlinCoroutines = "1.5.0"
+        const val kotlinCoroutines = "1.6.0"
 
         const val kotlinPoet = "1.8.0"
         const val okio = "2.10.0"
 
-        const val appcompat = "1.2.0"
+        const val appcompat = "1.4.0"
+        const val coreKtx = "1.7.0"
+        const val activityKtx = "1.4.0"
+        const val fragmentKtx = "1.4.1"
         const val viewModel = "2.3.1"
         const val recyclerView = "1.2.0"
         const val swipeRefreshLayout = "1.1.0"
@@ -75,6 +78,8 @@ class Dependencies : Plugin<Project> {
 
         const val kotlinCoroutinesTest = "1.3.9"
         const val materialDesign = "1.2.1"
+        const val firebaseAuth = "20.0.0"
+        const val playServicesAuth = "19.0.0"
         const val googleAutoService = "1.0-rc7"
 
         const val jsonObject = "20200518"
@@ -131,11 +136,15 @@ class Dependencies : Plugin<Project> {
 
     object GoogleLibraries {
         const val materialDesign = "com.google.android.material:material:${Versions.materialDesign}"
+        const val firebaseAuth = "com.google.firebase:firebase-auth:${Versions.firebaseAuth}"
+        const val playServicesAuth = "com.google.android.gms:play-services-auth:${Versions.playServicesAuth}"
     }
 
     object AndroidxLibraries {
         const val appcompat = "androidx.appcompat:appcompat:${Versions.appcompat}"
-        const val coreKtx = "androidx.core:core-ktx:${Versions.appcompat}"
+        const val coreKtx = "androidx.core:core-ktx:${Versions.coreKtx}"
+        const val activityKtx = "androidx.activity:activity-ktx:${Versions.activityKtx}"
+        const val fragmentKtx = "androidx.fragment:fragment-ktx:${Versions.fragmentKtx}"
         const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.recyclerView}"
         const val swipeRefreshLayout = "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.swipeRefreshLayout}"
         const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.viewModel}"
