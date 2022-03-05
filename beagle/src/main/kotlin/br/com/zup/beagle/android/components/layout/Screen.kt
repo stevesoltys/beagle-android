@@ -92,6 +92,7 @@ data class NavigationBar(
     val navigationBarItems: List<NavigationBarItem>? = null,
     val backButtonAccessibility: Accessibility? = null,
     val navigationBarStyle: NavigationBarStyle? = null,
+    val searchBar: SearchBar? = null
 )
 
 /**
@@ -106,6 +107,16 @@ data class NavigationBarStyle(
     val isShadowEnabled: Boolean? = null,
     val isTransparent: Boolean? = null,
     val titleImage: Image? = null
+)
+
+/**
+ * A search bar that is contained inside a navigation bar.
+ */
+@BeagleJson(name = "searchBar")
+data class SearchBar(
+    val placeholder: String? = null,
+    val hideWhenScrolling: Boolean? = null,
+    val onQueryUpdated: List<Action>? = null
 )
 
 /**

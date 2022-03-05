@@ -125,7 +125,7 @@ class BottomNavigationBar(
         menuItem: MenuItem
     ) {
 
-        rootView.getLifecycleOwner().lifecycleScope.launch(CoroutineDispatchers.IO) {
+        rootView.getLifecycleOwner().lifecycleScope.launch(CoroutineDispatchers.Main) {
             val stateListDrawable = StateListDrawable()
 
             val selectedDrawable = getDrawable(

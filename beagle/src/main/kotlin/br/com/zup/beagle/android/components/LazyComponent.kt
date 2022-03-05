@@ -19,6 +19,10 @@ package br.com.zup.beagle.android.components
 import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.get
+import br.com.zup.beagle.android.context.Bind
+import br.com.zup.beagle.android.utils.evaluate
+import br.com.zup.beagle.android.utils.observe
+import br.com.zup.beagle.android.utils.observeBindChanges
 import br.com.zup.beagle.android.view.ServerDrivenState
 import br.com.zup.beagle.android.view.ViewFactory
 import br.com.zup.beagle.android.view.custom.BeagleView
@@ -42,14 +46,28 @@ import br.com.zup.beagle.databinding.BeagleIncludeErrorServerDrivenBinding
  */
 @RegisterWidget("lazyComponent")
 data class LazyComponent(
-    val path: String,
+    val path: Bind<String>,
     val initialState: ServerDrivenComponent,
 ) : WidgetView() {
 
     override fun buildView(rootView: RootView): View {
         return ViewFactory.makeBeagleView(rootView).apply {
             addServerDrivenComponent(initialState)
-            updateView(path, this[0])
+
+            var previousPath: String? = null
+
+            observeBindChanges(rootView, this, path) { evaluatedPath ->
+
+                evaluatedPath?.let {
+                    if (previousPath == null) {
+                        updateView(evaluatedPath, this[0])
+                    }
+
+                    previousPath = evaluatedPath
+                }
+
+            }
+
             serverStateChangedListener = object : OnServerStateChanged {
 
                 override fun invoke(serverState: ServerDrivenState) {
@@ -57,15 +75,14 @@ data class LazyComponent(
                         addErrorScreen(this@apply, serverState)
                     }
                 }
-
-
             }
         }
     }
 
     private fun addErrorScreen(beagleView: BeagleView, serverState: ServerDrivenState.Error) {
         beagleView.removeAllViews()
-        val binding = BeagleIncludeErrorServerDrivenBinding.inflate(LayoutInflater.from(beagleView.context))
+        val binding =
+            BeagleIncludeErrorServerDrivenBinding.inflate(LayoutInflater.from(beagleView.context))
         beagleView.addView(binding.root)
         binding.buttonRetry.setOnClickListener {
             beagleView.removeAllViews()

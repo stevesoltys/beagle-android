@@ -25,7 +25,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -36,6 +36,9 @@ import br.com.zup.beagle.R
 import br.com.zup.beagle.android.components.layout.NavigationBar
 import br.com.zup.beagle.android.components.layout.NavigationBarItem
 import br.com.zup.beagle.android.components.layout.ScreenComponent
+import br.com.zup.beagle.android.components.layout.SearchBar
+import br.com.zup.beagle.android.components.utils.hideKeyboard
+import br.com.zup.beagle.android.context.ContextData
 import br.com.zup.beagle.android.setup.BeagleEnvironment
 import br.com.zup.beagle.android.setup.DesignSystem
 import br.com.zup.beagle.android.view.BeagleActivity
@@ -97,7 +100,64 @@ internal class ToolbarManager(private val toolbarTextManager: ToolbarTextManager
             navigationBar.navigationBarItems?.let { items ->
                 configToolbarItems(rootView, this, items, container, screenComponent)
             }
+
+            navigationBar.searchBar?.let { searchBar ->
+                setSearchView(
+                    rootView,
+                    rootView.getContext(),
+                    this,
+                    screenComponent,
+                    searchBar
+                )
+            }
         }
+    }
+
+    private fun setSearchView(
+        rootView: RootView,
+        context: Context,
+        toolbar: Toolbar,
+        screenComponent: ScreenComponent,
+        searchBar: SearchBar
+    ) {
+
+        val searchView = SearchView(context).apply {
+
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    hideKeyboard()
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String): Boolean {
+
+                    searchBar.onQueryUpdated?.let { actions ->
+                        screenComponent.handleEvent(
+                            rootView,
+                            this@apply,
+                            actions,
+                            context = ContextData(
+                                id = "onQueryUpdated",
+                                value = mapOf(
+                                    "query" to newText
+                                )
+                            ),
+                            analyticsValue = "onQueryUpdated"
+                        )
+                    }
+
+                    return true
+                }
+
+            })
+            queryHint = searchBar.placeholder ?: ""
+        }
+
+        toolbar.menu.clear()
+        val searchItem = toolbar.menu.add("Search")
+        searchItem.icon = searchView.findViewById<ImageView>(R.id.search_button).drawable
+        searchItem.actionView = searchView
+        searchItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW or MenuItem.SHOW_AS_ACTION_ALWAYS)
     }
 
     private fun setAttributeToolbar(
